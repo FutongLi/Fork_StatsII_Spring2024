@@ -53,7 +53,12 @@ library(stargazer)
 # open the data file we just imported using "import dataset...". In the window that 
 # opens, you'll notice we can manually change the type of data for each column...
 
-data <- 
+setwd("/Users/poisson/Documents/GitHub/Fork_StatsII_Spring2024/datasets/tutorial_Jan23")
+getwd()
+list.files()
+
+data <- read.csv('tutorial_data.csv')
+data
 
 #### Wrangling the data
 # We should now have a dataset where our variables are at least of the correct type.
@@ -67,10 +72,19 @@ data <-
 # We only have one year, so the two cols related to year can be dropped; also, we only
 # really need one col for country name, so let's drop country code too.
   
+data$Time.Code <- NULL
+data$Country.Code <- NULL
+
 # 3. Let's also get rid of the variable code in square brackets
 
-names(data) <- #hint: try using the function sub() with the regexp " \\[.*"
+names(data) <- sub() #hint: try using the function sub() with the regexp " \\[.*"
   
+colnames(data)
+colnames(data)[5] <- "Ease of doing business rank (1=most business-friendly regulations)"
+colnames(data)[6] <- "GDP per capita (current US$)"
+colnames(data)[7] <- "Tax revenue (% of GDP)"
+
+
 #### Analysing the data
 # Now that we have a dataset in the desired format, we can proceed to the analysis.
 
@@ -88,7 +102,16 @@ names(data) <- #hint: try using the function sub() with the regexp " \\[.*"
 
 # 5. Now let's run a regression!
 
+data[data == ".."] <- NA
+data <- data[complete.cases(data), ]
 formula <- `GDP per capita (current US$)` ~ `Tax revenue (% of GDP)` + `Ease of doing business rank (1=most business-friendly regulations)`
+model <- lm(formula, data = data)
+model
+
+as.numeric(data[,4])
+data <- data[1:58,]
+na.omit(data)
+
 
 # How do we interpret these results?
 
