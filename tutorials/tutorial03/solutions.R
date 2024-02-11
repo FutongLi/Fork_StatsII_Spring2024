@@ -105,6 +105,11 @@ predicted_data <- with(graduation, expand.grid(nonwhite = unique(nonwhite),
                                                mhs = unique(mhs),
                                                fhs = unique(fhs)))
   
+# predicted_data是我们准备用于预测的新数据框，其中包含了所有可能的组合。
+predicted_data <- cbind(predicted_data, predict(mod2, 
+                                                newdata = predicted_data,
+                                                type = "response",
+                                                se = TRUE))
 predicted_data <- cbind(predicted_data, predict(mod2, 
                                                 newdata = predicted_data,
                                                 type = "response",
@@ -112,6 +117,16 @@ predicted_data <- cbind(predicted_data, predict(mod2,
 
 # Now we can use the code in Jeff's lecture to fill out the confidence intervals 
 # and predicted probability (see lecture)
+
+# 这段代码使用within()函数向predicted_data数据框添加了三列：PredictedProb、LL和UL。
+
+# PredictedProb列计算了逻辑回归模型的预测概率。它使用plogis()函数对模型的预测值（fit）进行逻辑转换，将其转换为0和1之间的概率值。
+
+# LL列计算了预测概率的下限值，表示在95%的置信水平下的预测概率的下界。它使用模型的预测值减去1.96倍标准误差（se.fit），然后再进行逻辑转换。
+
+# UL列计算了预测概率的上限值，表示在95%的置信水平下的预测概率的上界。它使用模型的预测值加上1.96倍标准误差（se.fit），然后再进行逻辑转换。
+
+# 这样，predicted_data数据框中就包含了模型预测的概率值以及其对应的置信区间的上下界。
 predicted_data <- within(predicted_data,
                          {PredictedProb <- plogis(fit)
                           LL <- plogis(fit - (1.96 * se.fit))

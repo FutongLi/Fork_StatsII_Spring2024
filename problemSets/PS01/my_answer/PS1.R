@@ -91,7 +91,7 @@ bfgs_result <- optim(fn = RSS_ols, par = 0:1, x = data$x, y = data$y, method = "
 print(bfgs_result$par)
 
 #get the equivalent result using lm()
-lm_result <-  lm(y ~ x, data)
+lm_result <- lm(y ~ x, data)
 print(coef(lm_result))
 
 
