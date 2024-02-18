@@ -177,17 +177,17 @@
 		\noindent \textbf{Conclusion:}
 		
 		\noindent 
-		- The intercept (\( \beta_0 \)) of -0.081 suggests that when number of countries is 20 of 192 and the sanction is 5\% (considered as the reference category), the log odds of the individual agrees with the policy is -0.081.
+		- The intercept (\( \beta_0 \)) of -0.081 suggests that when number of countries is 20 of 192 and the sanction is 5\% (considered as the reference category), the estimated log odds of the individual agrees with the policy is -0.081 on average.
 		
-		- The coefficient for \emph{80 of 192 participating countries} (\( \beta_1 \)) is 0.336, indicating that increasing the number of countries from 20 to 80  increases the log odds of the individual agreeing with the policy by 0.336.
+		- The coefficient for \emph{80 of 192 participating countries} (\( \beta_1 \)) is 0.336, indicating that increasing the number of countries from 20 to 80  increases the estimated log odds of the individual agreeing with the policy by 0.336 on average.
 		
-		- The coefficient for \emph{160 of 192 participating countries} (\( \beta_2 \)) is 0.648, indicating that increasing the number of countries from 20 to 160  increases the log odds of the individual agreeing with the policy by 0.648.
+		- The coefficient for \emph{160 of 192 participating countries} (\( \beta_2 \)) is 0.648, indicating that increasing the number of countries from 20 to 160  increases the estimated log odds of the individual agreeing with the policy by 0.648 on average.
 		
-		- The coefficient for \emph{No sanction} (\( \beta_3 \)) is -0.192, indicating that compared to 5\% sanction selection, no sanction decreases the log odds of the individual agreeing with the policy by 0.192.
+		- The coefficient for \emph{No sanction} (\( \beta_3 \)) is -0.192, indicating that compared to 5\% sanction selection, no sanction decreases the estimated log odds of the individual agreeing with the policy by 0.192 on average.
 		
-		- The coefficient for \emph{15\% sanction} (\( \beta_4 \)) is -0.325, indicating that compared to 5\% sanction selection, choosing 15\% sanction decreases the log odds of the individual agrees with the policy by 0.352.
+		- The coefficient for \emph{15\% sanction} (\( \beta_4 \)) is -0.325, indicating that compared to 5\% sanction selection, choosing 15\% sanction decreases the estimated log odds of the individual agrees with the policy by 0.352 on average.
 		
-		- The coefficient for \emph{20\% sanction} (\( \beta_5 \)) is -0.495, indicating that compared to 5\% sanction selection, choosing 20\% sanction decreases the log odds of the individual agrees with the policy by 0.495.
+		- The coefficient for \emph{20\% sanction} (\( \beta_5 \)) is -0.495, indicating that compared to 5\% sanction selection, choosing 20\% sanction decreases the estimated log odds of the individual agrees with the policy by 0.495 on average.
 		
 		Based on these results, we can conclude the following:
 		
@@ -231,7 +231,7 @@
 		\vspace{.15cm}
 		
 		\noindent \textbf{(b) Answer:}
-		With 80 countries and no sanction, we can compute the log odds is around 0.063. Then we use logistic function to convert the logit value into a estimated probability. Finally, the probability is about 0.516.
+		With 80 countries and no sanction, we can set corresponding values and compute the estimated log odds is around 0.063. Then we use logistic function to convert the logit value into a estimated probability Finally, the probability is rounded as 0.516. This means that given 80 countries without sanctions, the probability of individual support policy is about 51.6\%.
 		
 		\noindent
 		\textbf{Computing as below:}
@@ -247,7 +247,7 @@
 				
 				Therefore, the interaction between the level of sanctions and the number of participating countries may not contribute significantly to explaining the variation in the dependent variable.
 				
-				In general, if we cannot reject the null hypothesis in an anova test, it may be more appropriate for the model selection not to include the interaction item. So I lean towards not change the answers to above two sub-questions.
+				In general, if we cannot reject the null hypothesis in an anova test, it may indicate that interaction terms for the logistic regression model are not significant predictor, and it would be more appropriate for the model selection not to include the interaction item. So I lean towards not change the answers to above two sub-questions.
 		
 			\vspace{.15cm}
 				
