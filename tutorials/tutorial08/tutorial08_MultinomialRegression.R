@@ -34,7 +34,8 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ## Ordered multinomial logits:
   
-  # This data set is analyzed by Long (1997).  The response variable has four ordered categories:
+  # This data set is analyzed by Long (1997).  
+  # The response variable has four ordered categories:
   # Strongly Disagree, Disagree, Agree, and Strongly Agree in relation to the statement
   
 
@@ -58,7 +59,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 workingMoms <- read.table("http://statmath.wu.ac.at/courses/StatsWithR/WorkingMoms.txt", header=T)
 
-
+head(workingMoms)
 
 # (a) Perform an ordered (proportional odds) logistic regression of attitude toward working mothers on the other variables.
 
