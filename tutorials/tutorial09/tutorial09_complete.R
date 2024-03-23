@@ -69,10 +69,10 @@ ggplot(data = NULL, aes(x = mod.ps$fitted.values, y = long_data$art)) +
   #geom_smooth(method = "loess", color = "red")
 
 # calculate pseudo R squared
-1 - (mod.ps$deviance/mod.ps$null.deviance)
+1 - (mod.ps$deviance/mod.ps$null.deviance) # deviance is used for evaluating logit models 
 
 # calculate RMSE
-sqrt(mean((mod.ps$model$art - mod.ps$fitted.values)^2))
+sqrt(mean((mod.ps$model$art - mod.ps$fitted.values)^2))  # no threshold;compared with alternative model 
 
 # Add an interaction?
 mod2.ps <- glm(art ~ fem * ., data = long_data, family = poisson)
