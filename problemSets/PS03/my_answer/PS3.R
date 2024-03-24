@@ -96,19 +96,28 @@ dat <- within(mexico_elections, {
 })
 
 dat <- select(dat, marginality.06:competitive.district)
-
 # EDA
 summary(dat)
 
 with(dat,
      list(mean(PAN.visits.06), var(PAN.visits.06))) # not equal
 hist(dat$PAN.visits.06)  # not normaly distributed
-
 # perform poisson regression model
 reg.ps <- glm(PAN.visits.06 ~., data = dat, family = poisson)
-summary(reg.ps)
-texreg(list(reg.ps), digits=3)
+summary(reg.ps) 
+# over-dispersion test
+install.packages("AER")
+library(AER)
+dispersiontest(reg.ps)
+# ZIP model 
+install.packages("pscl")
+library(pscl)
+reg.zip <- zeroinfl(PAN.visits.06 ~ ., data = dat, dist = "poisson")
+summary(reg.zip)
 
+texreg(list(reg.ps), digits=3)
+texreg(list(reg.zip), digits=3)
+stargazer(list(disp))
 exp(coef(reg.ps))
 
 # c) Estimated mean of visits

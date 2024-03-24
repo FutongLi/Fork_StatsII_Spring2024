@@ -223,7 +223,7 @@ For the second model (predicting positive GDP change):
 	Run a Poisson regression because the outcome is a count variable. Is there evidence that PAN presidential candidates visit swing districts more? Provide a test statistic and p-value.
 	
 			\noindent \textbf{Codes as below:}
-	\lstinputlisting[language=R, firstline=92, lastline=108]{PS3.R}% \vspace{.25cm}
+	\lstinputlisting[language=R, firstline=105, lastline=111]{PS3.R}% \vspace{.25cm}
 	
 			\noindent \textbf{Summary output:}
 			
@@ -234,7 +234,12 @@ For the second model (predicting positive GDP change):
 		\end{center}
 	\end{table}
 	
+
+	
+	
 	\noindent As we can see from the table above, the coefficient of the competitive.district dummy variable (where TRUE = 1 represents swing districts) is negative, indicating a negative association between the number of visits and swing districts. Additionally, the p-value of the competitive.district variable is greater than 0.05 (lack of asterisks), suggesting that there is insufficient evidence to conclude that PAN presidential candidates visit swing districts more.
+	
+	\noindent The result of over-dispersion test (P-value = 0.143 $>$ 0.05) shows that there is  no significant evidence to  reject null hypothesis that the data show no signs of overdispersion.
 	
 	\item [(b)]
 	Interpret the \texttt{marginality.06} and \texttt{PAN.governor.06} coefficients.
@@ -253,7 +258,7 @@ For the second model (predicting positive GDP change):
 	Provide the estimated mean number of visits from the winning PAN presidential candidate for a hypothetical district that was competitive (\texttt{competitive.district}=1), had an average poverty level (\texttt{marginality.06} = 0), and a PAN governor (\texttt{PAN.governor.06}=1).
 	
 				\noindent \textbf{Codes as below:}
-	\lstinputlisting[language=R, firstline=114, lastline=117]{PS3.R}% \vspace{.25cm}
+	\lstinputlisting[language=R, firstline=123, lastline=126]{PS3.R}% \vspace{.25cm}
 	\noindent In this given context, the estimated mean number of visits is about 0.0149.
 	
 \end{enumerate}
