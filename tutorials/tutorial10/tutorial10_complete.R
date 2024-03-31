@@ -28,7 +28,7 @@ stargazer(cox, type = "text")
 # for babies of businessmen compared to officials, holding sex constant.
 
 # exponentiate parameter estimates to obtain hazard ratios
-exp(-0.083546)
+exp(-0.083546) # equal to 0.92 roughly
 # The hazard ratio of female babies is 0.92 that of male babies, i.e. female babies are less
 # likely to die (92 female babies die for every 100 male babies; female deaths are 8% lower, etc.)
 

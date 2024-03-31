@@ -45,11 +45,61 @@ lapply(c("survival", "eha", "tidyverse", "ggfortify", "stargazer"),  pkgTest)
 # - illeg: Born out of marriage ("illegitimate")?
 # - m.age: Mother's age.
 
-## a) Using the Surv() function, build a survival object out of the `child` data.frame. 
+data(child)
+head(child)
+# tail(child)
+summary(child)
+
+## a)data()## a) Using the Surv() function, build a survival object out of the `child` data.frame. 
 ##    Using survfit() and R's plotting functions, produce a Kaplan-Meier plot of the data,
 ##    firstly for overall survival, and secondly comparing categories of socBranch. How do
 ##    you interpret the second plot?
 
+# with() 被用来指定在 child 数据框中执行 Surv(enter, exit, event) 表达式
+child_surv <- with(child, Surv(enter, exit, event))
+summary(child_surv)
+
+km <- survfit(child_surv ~ 1, data = child)
+summary(km, times = seq(0, 15, 1))
+
+plot(km, main = "Kaplan-Meier Plot", xlab = "Years", ylim = c(0.7, 1))
+autoplot(km) # equal to last one
+
+km_socBranch <- survfit(child_surv ~ socBranch, data = child)
+summary (km_socBranch)
+autoplot(km_socBranch)
+
+
 ## b) Run a Cox Proportional Hazard regression on the data, using an additive model with 
 ##    `socBranch` and `sex` as explanatory variables. Run a test to assess the quality of the
 ##    model. How can we interpret the coefficients? Plot the model.
+
+cox <- coxph(child_surv ~ sex + socBranch, data = child)
+summary(cox)
+
+drop1(cox, test = "Chisq")
+stargazer(cox, type = "text")
+
+cox_fit <- survfit(cox)
+autoplot(cox_fit)
+
+newdat <- with(child, 
+               data.frame(
+                 sex = c("male", "female"), socBranch="official"
+               )
+)
+
+plot(survfit(cox, newdata = newdat), xscale = 12,
+     conf.int = T,
+     ylim = c(0.6, 1),
+     col = c("red", "blue"),
+     xlab = "Time",
+     ylab = "Survival proportion",
+     main = "")
+legend("bottomleft",
+       legend=c("Male", "Female"),
+       lty = 1, 
+       col = c("red", "blue"),
+       text.col = c("red", "blue"))
+
+

@@ -1,0 +1,311 @@
+---
+title: "Replication"
+author: "Futong Li"
+date: "2024-03-30"
+output: powerpoint_presentation
+background: "grey" 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Agenda
+
+- Orginial Study Recap. 
+  (1)Overview (2)Theory (3)Result
+- Extension Based on Pilot Study. 
+  (1)Analysis (2)Output comparison (3)Finding
+  
+## Paper Overview
+
+**Paper:** Public Attitudes toward Young Immigrant Men
+**Author:** DALSTON G. WARD  
+**Source:** American Political Science Review  
+
+For more details please see <https://doi.org/10.1017/S0003055418000710>.
+
+  
+## Paper Overview
+
+**Why:** While immigrant young men may contribute economically, they could also be perceived as security and cultural threats. 
+**How:** Involving 2,100 Germans, a conjoint experiment was conducted in which they were asked to complete a survey，including evaluating groups of immigrants with randomly varying shares of young men.
+**What：**  
+1. Attitude: This study tests whether German attitudes toward young immigrant men differ from attitudes toward other immigrants
+
+2. What explains these attitudes:  Which of the three mechanisms described above (economic potential, security threat, and cultural threat) best explains attitudes toward young men.
+
+
+## Analysis Method
+
+**Analysis Unit:** Immigrant groups. The share of young men (under 25) per group was randomly selected as 0%, 25%, 50%, 75%, or 100%.  
+
+**Quantity of Interest:** Effect of Young Men on Settlement Preference is interpreted as the change in a group's probability of being preferred for settlement caused by a change in the share of young men (Settlement Preference)
+
+**Model selection:**  Weighted least squares regression (where the group attributes Young Men and Education enter as a series of dummy variables)
+
+## Analysis Result
+
+**Result:** The reslts show that groups of immigrants with a large share of young men receive substantially less supportpossibly due to perceived security and cultural threats. There was no evidence of high economic potential being a factor. These findings suggest economic, cultural, and security concerns all play a role in shaping attitudes towards immigrants.
+
+## Replication
+
+Outcome variable **Settlement Preference** is binary variable (1 if a group is selected and 0 otherwise)， 
+
+Compared to linear regression models, logistic regression models are better suited for binary outcome variables as they can provide predictions of the outcome variable's probability, not just the direction of the effect. 
+
+My interest is  in switching the focus of the study to the magnitude of the effect of predictor variables on the outcome variable. 
+
+Therefore, logistic regression models may be an appropriate choice
+
+## Re-analysis with logical regression
+
+```{r data lodaing,include=FALSE}
+# import libraries
+library(data.table)
+library(lmtest)
+library(multiwayvcov)
+library(texreg)
+library(car)
+
+# data loading
+setwd("/Users/poisson/Documents/Trinity/Msc in ADSD/Hilary Term/Applied Stats/Replication")
+data <- fread("YoungImmMenConjoint.csv", na.strings = "")
+# This data is used for all weighted estimation.
+datw <- data[!is.na(ps_weights)] 
+
+```
+
+
+```{r main model,echo=TRUE}
+# Model for Figure 1 and Table 1, Model 1
+log_main <- glm(settle_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,
+                family = binomial(link = "logit"),
+                data = datw)
+log_main_vcov <- cluster.vcov(log_main, datw[, "id"])
+log_main_coefs <- coeftest(log_main)
+
+# Model for Figure 1 and Table 1, Model 2
+log_main_NW <- glm(settle_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,
+                  family = binomial(link = "logit"),
+                  data = data)
+log_main_NW_vcov <- cluster.vcov(log_main_NW, data[, "id"])
+log_main_NW_coefs <- coeftest(log_main_NW)
+```
+
+
+```{r figure 1, include = FALSE}
+# Used in plotting below
+clust_confint <- function(Mod, Cov){
+  tt <- qt(c(0.025, 0.975), Mod$df.residual)
+  se <- sqrt(diag(Cov))
+  ci <- data.frame( varName = names(coef(Mod)), 
+                    beta = exp(coef(Mod)), upper = exp(coef(Mod)) + se * tt[ 1 ],
+                    lower = exp(coef(Mod)) + se * tt[ 2 ], stringsAsFactors = F)
+  
+  ci$varName <- gsub("group_edu|group_work|group_eng|group_men", "", ci$varName)
+  return(ci)
+}
+
+# Figure 1 (Save as 5in x 7in to recreate paper)
+plot_stuff <- clust_confint(log_main, log_main_vcov)
+plot_stuff <- plot_stuff[ -c(1,2,3,4), ] # Remove intercept
+plot_stuff[5, ] <- c("50%", 1, 1, 1)
+plot_stuff$y_vals <- c(1, 2, 4, 5, 3)
+plot_stuff$varName[1:4] <- c("0%", "25%", "75%", "100%")
+
+opar <- par(mar = c(5, 4, 1, 2))
+plot( x = as.numeric(plot_stuff$beta), y = as.numeric(plot_stuff$y_vals), pch = 20, ylim = c(0.8, 5.2), xlim = c( 0.3, 1.6 ), type = "n", yaxt = "n", xlab = "", ylab = "Percentage Young Men in Group", xaxt = "n", main = "")
+abline(v = 1, lwd = .5, lty = 2)
+points( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20)
+segments( x0 = as.numeric(plot_stuff$lower), x1 = as.numeric(plot_stuff$upper), y0 = plot_stuff$y_vals, y1 = plot_stuff$y_vals)
+axis(2, at = plot_stuff$y_vals, labels = plot_stuff$varName)
+axis(1, at = seq(0, 2, by = 0.1))
+mtext("Relative Change in Settlement Preference Odds", side = 1, line = 2.25, cex = 1, outer = F)
+par(opar)
+
+
+```
+
+
+```{r table 1, include=FALSE}
+# Table 1 (Variable labels added in Tex)
+texreg(list(
+  log_main,
+  log_main_NW),
+  override.se = list(
+    log_main_coefs[,2],
+    log_main_NW_coefs[,2]),
+  override.pvalues = list(
+    log_main_coefs[,4],
+    log_main_NW_coefs[,4]),
+  custom.coef.map = list(
+    '(Intercept)' = "Intercept",
+    'men0' = "0%",
+    'men25' = "25%",
+    'men75' = "75%",
+    'men100' = "100%",
+    'factor(group_edu)10' = "10%",
+    'factor(group_edu)20' = "20%",
+    'factor(group_edu)30' = "30%"
+  ),
+  booktabs = TRUE,
+  dcolumn = TRUE,
+  digits = 3
+)
+
+```
+
+
+```{r job model, echo=TRUE}
+# Figure 2 and Table 2, Model 
+job_log_mod <- glm(jobs_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,family = binomial(link = "logit"),data = datw)
+job_log_vcov <- cluster.vcov(job_log_mod, datw[, id])
+job_log_coef <- coeftest(job_log_mod, job_log_vcov)
+#linearHypothesis(job_log_mod, "men25 - men75", vcov = job_log_vcov)
+#linearHypothesis(job_log_mod, "men25 - men75", vcov = job_log_vcov)
+#linearHypothesis(job_log_mod, "men75 - men100", vcov = job_log_vcov)
+
+# Figure 2 and Table 2, Model 2
+job_log_modNW <- glm(jobs_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,family = binomial(link = "logit"),data = data)
+job_log_vcovNW <- cluster.vcov(job_log_modNW, data[, id])
+job_log_coefNW <- coeftest(job_log_modNW, job_log_vcovNW)
+
+```
+
+
+```{r sec model, include=FALSE}
+# Figure 2 and Table 2, Model 3
+sec_log_mod <- glm(security_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,family = binomial(link = "logit"),data = datw)
+sec_log_vcov <- cluster.vcov(sec_log_mod, datw[ , id])
+(sec_log_coef <- coeftest(sec_log_mod, sec_log_vcov))
+
+# test differences between effects as mentioned in text
+linearHypothesis(sec_log_mod, "men0 - men25 = 0", vcov = sec_log_vcov)
+linearHypothesis(sec_log_mod, "men100 - men75 = 0", vcov = sec_log_vcov)
+
+# Figure 2 and Table 2, Model 4
+sec_log_modNW <- glm(security_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,family = binomial(link = "logit"),data = data)
+sec_log_vcovNW <- cluster.vcov(sec_log_modNW, data[ , id])
+(sec_log_coefNW <- coeftest(sec_log_modNW, sec_log_vcovNW))
+
+```
+
+
+```{r culture model, include=FALSE}
+# Figure 2 and Table 2, Model 5
+culture_log_mod <- glm(culture_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,family = binomial(link = "logit"),data = datw)
+culture_log_vcov <- cluster.vcov(culture_log_mod, datw[ , id])
+(culture_log_coef <- coeftest(culture_log_mod, culture_log_vcov))
+
+# test differences between effects as mentioned in text
+linearHypothesis(culture_log_mod, "men0 - men25", vcov = culture_log_vcov)
+linearHypothesis(culture_log_mod, "men25 - men75", vcov = culture_log_vcov)
+linearHypothesis(culture_log_mod, "men75 - men100", vcov = culture_log_vcov)
+
+# Figure 2 and Table 2, Model 6
+culture_log_modNW <- glm(culture_binary ~ factor(group_edu) + men0 + men25 + men75 + men100,family = binomial(link = "logit"),data = data)
+culture_log_vcovNW <- cluster.vcov(culture_log_modNW, data[ , id])
+(culture_log_coefNW <- coeftest(culture_log_modNW, culture_log_vcovNW))
+```
+
+
+```{r figure 2, included=FALSE}
+# Figure 2 
+opar <- par(mfrow = c(1,3), mar = c(0, 0, 3, 1.5), oma = c(4.5,5.5,0,.5))
+
+#### Jobs Plot ####
+
+plot_stuff <- clust_confint(job_log_mod, job_log_vcov)
+plot_stuff <- plot_stuff[ -c(1,2,3,4), ]
+plot_stuff[5, ] <- c("50%", 0, 0, 0)
+plot_stuff$y_vals <- c(1, 2, 4, 5, 3)
+plot_stuff$varName[1:4] <- c("0%", "25%", "75%", "100%")
+
+plot( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20, ylim = c(.8, 5.2), xlim = c(0.6, 1.4), type = "n", yaxt = "n", xlab = "", ylab = "", yaxs = "i", xaxt = "n", main = "DV: Economic Potential")
+abline(v = 1, lwd = .75, lty = 2)
+points( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20)
+segments( x0 = as.numeric(plot_stuff$lower), x1 = as.numeric(plot_stuff$upper), y0 = plot_stuff$y_vals, y1 = plot_stuff$y_vals)
+axis(1, at = seq(0, 2, by = 0.05))
+axis(2, at = plot_stuff$y_vals, labels = plot_stuff$varName)
+
+mtext( "Relative Change in High Scale Rating Odds", side = 1, line = 3, cex = 1, outer = T)
+mtext("Percentage Young Men in Group", side = 2, line = 3)
+
+#### Security plot ####
+
+plot_stuff <- clust_confint(sec_log_mod, sec_log_vcov)
+plot_stuff <- plot_stuff[ -c(1,2,3,4), ] 
+plot_stuff[5, ] <- c("50%", 0, 0, 0)
+plot_stuff$y_vals <- c(1, 2, 4, 5, 3)
+plot_stuff$varName[1:4] <- c("0%", "25%", "75%", "100%")
+
+plot( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20, ylim = c(.8, 5.2), xlim = c(0.6, 1.4), type = "n", yaxt = "n", xlab = "", ylab = "", yaxs = "i", xaxt = "n", main = "DV: Security Threat")
+abline(v = 1, lwd = .75, lty = 2)
+points( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20)
+segments( x0 = as.numeric(plot_stuff$lower), x1 = as.numeric(plot_stuff$upper), y0 = plot_stuff$y_vals, y1 = plot_stuff$y_vals)
+axis(1, at = seq(0, 2, by = 0.05))
+
+#### Culture Plot ####
+
+plot_stuff <- clust_confint(culture_log_mod, culture_log_vcov)
+plot_stuff <- plot_stuff[ -c(1,2,3,4), ] 
+plot_stuff[5, ] <- c("50%", 0, 0, 0)
+plot_stuff$y_vals <- c(1, 2, 4, 5, 3)
+plot_stuff$varName[1:4] <- c("0%", "25%", "75%", "100%")
+
+plot( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20, ylim = c(.8, 5.2), xlim = c(0.6, 1.4), type = "n", yaxt = "n", xlab = "", ylab = "", yaxs = "i", xaxt = "n", main = "DV: Cultural Threat")
+abline(v = 1, lwd = .75, lty = 2)
+points( x = plot_stuff$beta, y = plot_stuff$y_vals, pch = 20)
+segments( x0 = as.numeric(plot_stuff$lower), x1 = as.numeric(plot_stuff$upper), y0 = plot_stuff$y_vals, y1 = plot_stuff$y_vals)
+axis(1, at = seq(0, 2, by = 0.05))
+
+par(opar)
+
+```
+
+
+```{r table 2, include=FALSE}
+# Table 2 (variable labels added in Tex)
+texreg(list(
+  job_log_mod,
+  job_log_modNW,
+  sec_log_mod,
+  sec_log_modNW,
+  culture_log_mod,
+  culture_log_modNW),
+  override.se = list(
+    job_log_coef[,2],
+    job_log_coefNW[,2],
+    sec_log_coef[,2],
+    sec_log_coefNW[,2],
+    culture_log_coef[,2],
+    culture_log_coefNW[,2]),
+  override.pvalues = list(
+    job_log_coef[,4],
+    job_log_coefNW[,4],
+    sec_log_coef[,4],
+    sec_log_coefNW[,4],
+    culture_log_coef[,4],
+    culture_log_coefNW[,4]),
+  custom.coef.map = list(
+    '(Intercept)' = "Intercept",
+    'men0' = "0%",
+    'men25' = "25%",
+    'men75' = "75%",
+    'men100' = "100%",
+    'factor(group_edu)10' = "10%",
+    'factor(group_edu)20' = "20%",
+    'factor(group_edu)30' = "30%"
+  ),
+  booktabs = TRUE,
+  dcolumn = TRUE,
+  digits = 3
+)
+```
+
+
+## Output Camparison
+
+## Findings
+

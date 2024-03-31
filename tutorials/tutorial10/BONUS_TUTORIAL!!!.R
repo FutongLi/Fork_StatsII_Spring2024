@@ -39,10 +39,18 @@ lapply(c("tidyverse", "VGAM"),  pkgTest)
 # - `art`: number of articles published
 # - `cit`: number of citations received
 
+data <- read.csv("long97.csv")
+summary(data)
+head(data)
+
 # a) Explore the distribution of `job`. What conclusions do you draw regarding the original 
 # coding of the `job` variable? what effects could this have on the possible use of this 
 # variable as an outcome in a regression model? Run an OLS model with `jobs` as the dependent 
 # variable. Comment on the results.
+
+hist(data$job)
+
+summary(m1 <- lm(job ~., data[,-2]))
 
 # b) The `jobcen` variable is a recoding of `job` such that values equal to or less than 1
 # are scored 1. Run an OLS model using this *censored* variable as the outcome. How do the 
